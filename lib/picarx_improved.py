@@ -1,3 +1,5 @@
+import logging
+from logdecorator import log_on_start , log_on_end , log_on_error
 import time
 try:
 from ezblock import *
@@ -9,6 +11,7 @@ print ("This computer does not appear to be a PiCar -X system
 (ezblock is not present). Shadowing hardware calls with
 substitute functions ")
 from sim_ezblock import *
+       
 from servo import Servo 
 from pwm import PWM
 from pin import Pin
@@ -16,7 +19,11 @@ from adc import ADC
 from filedb import fileDB
 import time
 
-
+logging_format = "%( asctime)s: %( message)s"
+logging.basicConfig(format=logging_format , level=logging.INFO ,
+datefmt ="%H:%M:%S")
+logging.getLogger ().setLevel(logging.DEBUG)
+####At points in your code where you want a message printed to the command line, insert a line logging.debug(message) (where “message” is the text you want displayed).
 
 class Picarx(object):
     PERIOD = 4095
@@ -56,7 +63,7 @@ class Picarx(object):
             pin.period(self.PERIOD)
             pin.prescaler(self.PRESCALER)
 
-
+    atexit.register(self.cleanup)
 
     def set_motor_speed(self,motor,speed):
         # global cali_speed_value,cali_dir_value
@@ -75,7 +82,8 @@ class Picarx(object):
         else:
             self.motor_direction_pins[motor].low()
             self.motor_speed_pins[motor].pulse_width_percent(speed)
-
+#############################################################################
+##################Is this where the scaling is done?###################
     def motor_speed_calibration(self,value):
         # global cali_speed_value,cali_dir_value
         self.cali_speed_value = value
@@ -179,7 +187,7 @@ class Picarx(object):
             print("power_scale:",power_scale)
             if (current_angle / abs_current_angle) > 0:
                 self.set_motor_speed(1, speed)
-                self.set_motor_speed(2, -1*speed * power_scale)
+                self.set_motor_speed(2, -1*speed * power_scale)     ####is the speed the *1?
             else:
                 self.set_motor_speed(1, speed * power_scale)
                 self.set_motor_speed(2, -1*speed )
@@ -218,6 +226,42 @@ class Picarx(object):
         #print(cm)
         return cm
 
+    #Function to move the pi car forward and backward
+    def forward_backward(angle=0, dist=2,  direction=forward, speed=50, iter=1):
+           for i in range(0, iter):
+                set_dir_servo_angle(angle)
+                direction(speed)
+                time.sleep(dist)
+           set_dir_servo_angle(0)
+           stop()
+     
+       
+    def parallel_park_right(side):
+          angle = 45
+          if side == 'left':
+            angle = -angle
+            spd = 50
+            dst = 2
+          else:
+            angle = 0
+            spd = 50
+            dst = 2
+          forward_backward(angle=0, dist=0.5, direction=forward, speed=spd)
+          forward_backward(angle=angle, dist=0.5, direction=backward, speed=spd)
+          forward_backward(angle=-angle, dist=dst, direction=backward, speed=spd)
+          forward_backward(speed=spd)
+       
+    def k_turn(side):
+        if side == 'left':
+            angle = -40
+            spd = 50
+        else:
+            angle = 50
+            spd = 20
+        forward_backward(angle=angle, dist=2.0, direction=forward, speed=spd)
+        forward_backward(angle=-angle, dist=2.5, direction=backward, speed=spd)
+        forward_backward(angle=angle, dist=2.8, direction=forward, speed=spd)
+       
 
 if __name__ == "__main__":
     px = Picarx()
