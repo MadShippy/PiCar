@@ -1,6 +1,7 @@
 import logging
 from logdecorator import log_on_start , log_on_end , log_on_error
 import time
+
 try:
 from ezblock import *
 from ezblock import __reset_mcu__
@@ -17,7 +18,8 @@ from pwm import PWM
 from pin import Pin
 from adc import ADC
 from filedb import fileDB
-import time
+       
+import atexit
 
 logging_format = "%( asctime)s: %( message)s"
 logging.basicConfig(format=logging_format , level=logging.INFO ,
