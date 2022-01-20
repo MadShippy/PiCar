@@ -2,4 +2,9 @@ import logging
 from logdecorator import log_on_start , log_on_end , log_on_error
 import time
 
+logging_format = "%( asctime)s: %( message)s"
+logging.basicConfig(format=logging_format , level=logging.INFO ,
+datefmt ="%H:%M:%S")
+logging.getLogger ().setLevel(logging.DEBUG)
+####At points in your code where you want a message printed to the command line, insert a line logging.debug(message) (where “message” is the text you want displayed).
 
