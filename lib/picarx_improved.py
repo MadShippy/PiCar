@@ -1,31 +1,32 @@
 import logging
 from logdecorator import log_on_start , log_on_end , log_on_error
 import time
-
-try:
-from ezblock import *
-from ezblock import __reset_mcu__
-__reset_mcu__ ()
-time.sleep (0.01)
-except ImportError:
-print ("This computer does not appear to be a PiCar -X system
-(ezblock is not present). Shadowing hardware calls with
-substitute functions ")
-from sim_ezblock import *
-       
-from servo import Servo 
-from pwm import PWM
-from pin import Pin
-from adc import ADC
-from filedb import fileDB
-       
 import atexit
 
 logging_format = "%( asctime)s: %( message)s"
 logging.basicConfig(format=logging_format , level=logging.INFO ,
 datefmt ="%H:%M:%S")
 logging.getLogger ().setLevel(logging.DEBUG)
-####At points in your code where you want a message printed to the command line, insert a line logging.debug(message) (where “message” is the text you want displayed).
+####At points in your code where you want a message printed to the command line, insert a line logging.debug(message) (where “message” is the text you want displayed)
+
+try:
+       sys.path.append(r'/home/pi/picar-x/lib')
+       from servo import Servo 
+       from pwm import PWM
+       from pin import Pin
+       from adc import ADC
+       from filedb import fileDB
+       from utils import __reset_mcu__
+       FILEDBNNAME = '/home/pi/.config'
+       __reset_mcu__ ()
+       time.sleep (0.01)
+except ImportError:
+       print ("This computer does not appear to be a PiCar -X system
+       (ezblock is not present). Shadowing hardware calls with
+       substitute functions ")
+       from sim_ezblock import *
+       
+    
 
 class Picarx(object):
     PERIOD = 4095
