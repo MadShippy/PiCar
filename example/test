@@ -1,2 +1,9 @@
 #Program to test functions in the library
 from picarx_improved import PiCar
+import time
+import logging
+
+if __name__ == "__main__":
+  px = PiCar()
+  logging.info("Starting parallel park")
+  px.parallel_park(100)
