@@ -17,11 +17,10 @@ try:
        from adc import ADC
        from filedb import fileDB
        from utils import __reset_mcu__
-       FILEDBNNAME = '/home/pi/.config'
        __reset_mcu__ ()
        time.sleep (0.01)
 except ImportError:
-       print ("This computer does not appear to be a PiCar -X system
+       logging.debug("This computer does not appear to be a PiCar -X system
        (ezblock is not present). Shadowing hardware calls with
        substitute functions ")
        from sim_ezblock import *
@@ -61,12 +60,12 @@ class Picarx(object):
         self.cali_dir_value = [int(i.strip()) for i in self.cali_dir_value.strip("[]").split(",")]
         self.cali_speed_value = [0, 0]
         self.dir_current_angle = 0
-        #初始化PWM引脚
+        
         for pin in self.motor_speed_pins:
             pin.period(self.PERIOD)
             pin.prescaler(self.PRESCALER)
 
-    atexit.register(self.cleanup)
+    #atexit.register(self.cleanup)
 
     def set_motor_speed(self,motor,speed):
         # global cali_speed_value,cali_dir_value
@@ -76,8 +75,8 @@ class Picarx(object):
         elif speed < 0:
             direction = -1 * self.cali_dir_value[motor]
         speed = abs(speed)
-        if speed != 0:
-            speed = int(speed /2 ) + 50
+        # if speed != 0:                                #TAKE OUT SCALING            
+           # speed = int(speed /2 ) + 50         
         speed = speed - self.cali_speed_value[motor]
         if direction < 0:
             self.motor_direction_pins[motor].high()
@@ -85,8 +84,7 @@ class Picarx(object):
         else:
             self.motor_direction_pins[motor].low()
             self.motor_speed_pins[motor].pulse_width_percent(speed)
-#############################################################################
-##################Is this where the scaling is done?###################
+
     def motor_speed_calibration(self,value):
         # global cali_speed_value,cali_dir_value
         self.cali_speed_value = value
@@ -110,7 +108,7 @@ class Picarx(object):
     def dir_servo_angle_calibration(self,value):
         # global dir_cal_value
         self.dir_cal_value = value
-        print("calibrationdir_cal_value:",self.dir_cal_value)
+        logging.debug("calibrationdir_cal_value:",self.dir_cal_value)
         self.config_flie.set("picarx_dir_servo", "%s"%value)
         self.dir_servo_pin.angle(value)
 
@@ -118,7 +116,7 @@ class Picarx(object):
         # global dir_cal_value
         self.dir_current_angle = value
         angle_value  = value + self.dir_cal_value
-        print("angle_value:",angle_value)
+        logging.debug("angle_value:",angle_value)
         # print("set_dir_servo_angle_1:",angle_value)
         # print("set_dir_servo_angle_2:",dir_cal_value)
         self.dir_servo_pin.angle(angle_value)
@@ -127,27 +125,27 @@ class Picarx(object):
         # global cam_cal_value_1
         self.cam_cal_value_1 = value
         self.config_flie.set("picarx_cam1_servo", "%s"%value)
-        print("cam_cal_value_1:",self.cam_cal_value_1)
+        logging.debug("cam_cal_value_1:",self.cam_cal_value_1)
         self.camera_servo_pin1.angle(value)
 
     def camera_servo2_angle_calibration(self,value):
         # global cam_cal_value_2
         self.cam_cal_value_2 = value
         self.config_flie.set("picarx_cam2_servo", "%s"%value)
-        print("picarx_cam2_servo:",self.cam_cal_value_2)
+        logging.debug("picarx_cam2_servo:",self.cam_cal_value_2)
         self.camera_servo_pin2.angle(value)
 
     def set_camera_servo1_angle(self,value):
         # global cam_cal_value_1
         self.camera_servo_pin1.angle(-1*(value + -1*self.cam_cal_value_1))
         # print("self.cam_cal_value_1:",self.cam_cal_value_1)
-        print((value + self.cam_cal_value_1))
+        logging.debug((value + self.cam_cal_value_1))
 
     def set_camera_servo2_angle(self,value):
         # global cam_cal_value_2
         self.camera_servo_pin2.angle(-1*(value + -1*self.cam_cal_value_2))
         # print("self.cam_cal_value_2:",self.cam_cal_value_2)
-        print((value + self.cam_cal_value_2))
+        logging.debug((value + self.cam_cal_value_2))
 
     def get_adc_value(self):
         adc_value_list = []
@@ -168,7 +166,7 @@ class Picarx(object):
             if abs_current_angle > 40:
                 abs_current_angle = 40
             power_scale = (100 - abs_current_angle) / 100.0 
-            print("power_scale:",power_scale)
+            logging.debug("power_scale:",power_scale)
             if (current_angle / abs_current_angle) > 0:
                 self.set_motor_speed(1, -1*speed)
                 self.set_motor_speed(2, speed * power_scale)
@@ -187,10 +185,10 @@ class Picarx(object):
             if abs_current_angle > 40:
                 abs_current_angle = 40
             power_scale = (100 - abs_current_angle) / 100.0 
-            print("power_scale:",power_scale)
-            if (current_angle / abs_current_angle) > 0:
+            logging.debug("power_scale:",power_scale)
+            if (current_angle / abs_current_angle) > 0:             #####NEED TO IMPLEMENT ACKERMAN STEERING HERE
                 self.set_motor_speed(1, speed)
-                self.set_motor_speed(2, -1*speed * power_scale)     ####is the speed the *1?
+                self.set_motor_speed(2, -1*speed * power_scale)     
             else:
                 self.set_motor_speed(1, speed * power_scale)
                 self.set_motor_speed(2, -1*speed )
@@ -198,6 +196,48 @@ class Picarx(object):
             self.set_motor_speed(1, speed)
             self.set_motor_speed(2, -1*speed)                  
 
+    def forward_backward(self, speed, angle):
+        self.set_dir_servo_angle(angle)
+        if speed >= 0:
+            self.forward(speed)
+        else:
+            self.backward(abs(speed))
+               
+       
+    def parallel_park_right(side = "right"):
+          angle = 45
+          if side == "left":
+            angle = -angle
+            spd = 50
+          forward_backward(speed=-spd. angle=angle)
+          time.sleep(0.5)
+          self.stop()
+          forward_backward(speed=-spd, angle=-angle)
+          time.sleep(0.5)
+          self.stop()
+          forward_backward(speed=spd, angle=0)
+          time.sleep(0.5)
+          self.stop()
+       
+    def k_turn(side):
+        if side == 'left':
+            angle = -40
+            spd = 50
+        else:
+            angle = 50
+            spd = 20
+        forward_backward(speed=spd, angle=angle)
+        time.sleep(0.5)
+        self.stop()
+        forward_backward(speed=-spd, angle=-angle)
+        time.sleep(0.5)
+        self.stop()
+        forward_backward(speed=spd, angle=angle)
+        time.sleep(0.5)
+        self.stop()
+              
+    @atexit.register
+              
     def stop(self):
         self.set_motor_speed(1, 0)
         self.set_motor_speed(2, 0)
@@ -226,44 +266,7 @@ class Picarx(object):
                 return -2
         during = pulse_end - pulse_start
         cm = round(during * 340 / 2 * 100, 2)
-        #print(cm)
         return cm
-
-    #Function to move the pi car forward and backward
-    def forward_backward(angle=0, dist=2,  direction=forward, speed=50, iter=1):
-           for i in range(0, iter):
-                set_dir_servo_angle(angle)
-                direction(speed)
-                time.sleep(dist)
-           set_dir_servo_angle(0)
-           stop()
-     
-       
-    def parallel_park_right(side):
-          angle = 45
-          if side == 'left':
-            angle = -angle
-            spd = 50
-            dst = 2
-          else:
-            angle = 0
-            spd = 50
-            dst = 2
-          forward_backward(angle=0, dist=0.5, direction=forward, speed=spd)
-          forward_backward(angle=angle, dist=0.5, direction=backward, speed=spd)
-          forward_backward(angle=-angle, dist=dst, direction=backward, speed=spd)
-          forward_backward(speed=spd)
-       
-    def k_turn(side):
-        if side == 'left':
-            angle = -40
-            spd = 50
-        else:
-            angle = 50
-            spd = 20
-        forward_backward(angle=angle, dist=2.0, direction=forward, speed=spd)
-        forward_backward(angle=-angle, dist=2.5, direction=backward, speed=spd)
-        forward_backward(angle=angle, dist=2.8, direction=forward, speed=spd)
        
 
 if __name__ == "__main__":
