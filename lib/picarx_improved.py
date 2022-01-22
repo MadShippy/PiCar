@@ -240,7 +240,10 @@ class Picarx(object):
     def stop(self):
         self.set_motor_speed(1, 0)
         self.set_motor_speed(2, 0)
-
+    
+     def cleanup(self):
+        time.sleep(1)
+        self.stop()
 
     def Get_distance(self):
         timeout=0.01
@@ -267,6 +270,7 @@ class Picarx(object):
         cm = round(during * 340 / 2 * 100, 2)
         return cm
        
+                     
 
 if __name__ == "__main__":
     px = Picarx()
