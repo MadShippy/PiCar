@@ -49,7 +49,7 @@ class Picarx(object):
         self.left_rear_dir_pin = Pin("D4")
         self.right_rear_dir_pin = Pin("D5")
 
-
+        self.gray = Grayscale_Module(950)
         self.S0 = ADC('A0')
         self.S1 = ADC('A1')
         self.S2 = ADC('A2')
@@ -61,11 +61,11 @@ class Picarx(object):
         self.cali_speed_value = [0, 0]
         self.dir_current_angle = 0
         
+        atexit.register(self.stop)
         for pin in self.motor_speed_pins:
             pin.period(self.PERIOD)
             pin.prescaler(self.PRESCALER)
 
-    #atexit.register(self.cleanup)
 
     def set_motor_speed(self,motor,speed):
         # global cali_speed_value,cali_dir_value
@@ -234,14 +234,13 @@ class Picarx(object):
         forward_backward(speed=spd, angle=angle)
         time.sleep(0.5)
         self.stop()
-              
-    @atexit.register
+        
               
     def stop(self):
         self.set_motor_speed(1, 0)
         self.set_motor_speed(2, 0)
     
-     def cleanup(self):
+    def cleanup(self):
         time.sleep(1)
         self.stop()
 
