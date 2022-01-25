@@ -49,7 +49,7 @@ class Picarx(object):
         self.left_rear_dir_pin = Pin("D4")
         self.right_rear_dir_pin = Pin("D5")
 
-        self.gray = Grayscale_Module(950)
+        self.GM = Grayscale_Module(950)
         self.S0 = ADC('A0')
         self.S1 = ADC('A1')
         self.S2 = ADC('A2')
