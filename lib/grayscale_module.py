@@ -21,8 +21,24 @@ class Grayscale_Module(object):
             return 'right'
 
         elif fl_list[2] <= self.ref:
-            return 'left'
+            return 'left' 
+ 
+#Function to steer based on light/dark data
+    def get_line_pos(self, target = "dark", sensitivity = 1.5):
+        current = self.get_grayscale_data()
+        if target == "dark":
+            idx = current_data.index(math.min(current_data))
+        else:
+            idx = current_data.index(math.max(current_data))
+            
+        if idk == 0:
+            return -1
+        elif idk == 1:
+            return 0
+        elif idx == 2:
+            return 1
         
+        self.old_data = current data        
   
 
     def get_grayscale_data(self):
