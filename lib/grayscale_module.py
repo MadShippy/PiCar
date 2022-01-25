@@ -6,6 +6,7 @@ class Grayscale_Module(object):
         self.chn_1 = ADC("A1")
         self.chn_2 = ADC("A2")
         self.ref = ref
+        self.old_data = self.get_grayscale_data()
 
 
     def get_line_status(self,fl_list):
@@ -21,6 +22,8 @@ class Grayscale_Module(object):
 
         elif fl_list[2] <= self.ref:
             return 'left'
+        
+  
 
     def get_grayscale_data(self):
         adc_value_list = []
