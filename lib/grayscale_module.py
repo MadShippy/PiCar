@@ -2,9 +2,9 @@ from adc import ADC
 
 class Grayscale_Module(object):
     def __init__(self,ref = 1000):
-        self.chn_0 = ADC("A0")
-        self.chn_1 = ADC("A1")
-        self.chn_2 = ADC("A2")
+        self.C0 = ADC("A0")
+        self.C1 = ADC("A1")
+        self.C2 = ADC("A2")
         self.ref = ref
         self.old_data = self.get_grayscale_data()
 
@@ -43,9 +43,9 @@ class Grayscale_Module(object):
 
     def get_grayscale_data(self):
         adc_value_list = []
-        adc_value_list.append(self.chn_0.read())
-        adc_value_list.append(self.chn_1.read())
-        adc_value_list.append(self.chn_2.read())
+        adc_value_list.append(self.C0.read())
+        adc_value_list.append(self.C1.read())
+        adc_value_list.append(self.C2.read())
         return adc_value_list
 
 if __name__ == "__main__":
