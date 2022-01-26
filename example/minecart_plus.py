@@ -1,3 +1,5 @@
+import time
+import numpy
 import sys
 sys.path.append(r'/home/pi/picar-x/lib')
 from utils import reset_mcu
@@ -5,7 +7,22 @@ reset_mcu()
 from grayscale_module import Grayscale_Module
 from picarx_improved import Picarx
 
-
+class Sensor(Picarx):
+  def __init__(self):
+    self.C0 = ADC("A0")
+    self.C1 = ADC("A1")
+    self.C2 = ADC("A2")
+  def get_adc_value(self):
+    adc_value_list = []
+    adc_value_list.append(self.C0.read())
+    adc_value_list.append(self.C1.read())
+    adc_value_list.append(self.C2.read())
+    return adc_value_list
+  
+class Interpreter(Sensor):
+  def __init__(self):
+  
+  
 
 if __name__=='__main__':
   try:
