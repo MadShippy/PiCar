@@ -1,5 +1,5 @@
 import sys
-sys.path.append(r'/home/kaanb/RobotSystems/lib')
+sys.path.append(r'/home/MadShippy/PiCar/lib')
 import time
 import numpy
 from picarx_improved import Picarx
