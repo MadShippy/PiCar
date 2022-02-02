@@ -1,5 +1,5 @@
 import sys
-sys.path.append(r'/home/kaanb/RobotSystems/lib')
+sys.path.append(r'/home/MadShippy/PiCar/lib')
 import time
 import numpy
 from picarx_improved import Picarx
@@ -19,8 +19,8 @@ class Sensor(Picarx):
         return adc_value_list
 
 def producer(sensor_bus, delay_s):
-    sensor = SensorCommands()
-    while(1):
+    sensor = Sensor()
+    while True:
         set_val = sensor.get_adc_value()
         sensor_bus.write(set_val)
         time.sleep(delay_s)
