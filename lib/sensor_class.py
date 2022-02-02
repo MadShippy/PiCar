@@ -17,3 +17,10 @@ class Sensor(Picarx):
         adc_value_list.append(self.C1.read())
         adc_value_list.append(self.C2.read())
         return adc_value_list
+
+def producer(sensor_bus, delay_s):
+    sensor = SensorCommands()
+    while(1):
+        set_val = sensor.get_adc_value()
+        sensor_bus.write(set_val)
+        time.sleep(delay_s)
